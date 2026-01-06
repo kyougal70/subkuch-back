@@ -4,6 +4,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductCategory, ProductStatus } from './schema/product.schema';
 import { ConfigService } from '@nestjs/config';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Controller('products')
 export class ProductsController {
@@ -36,6 +37,20 @@ export class ProductsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
+  }
+
+  @Get('test')
+  test() {
+    console.log('test start');
+    return true;
+  }
+
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  handleCron() {
+    fetch('https://subkuch-back.onrender.com/products/test').then((res) => {
+      res.json();
+      console.log('test complete');
+    });
   }
 
   @Patch(':id')
