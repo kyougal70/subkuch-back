@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload Image – Cloudinary</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+  <style>
+      * {
+          box-sizing: border-box;
+          font-family: Arial, sans-serif;
+      }
+
+      body {
+          margin: 0;
+          background: #f4f6f8;
+          padding: 16px;
+      }
+
+      h1 {
+          margin-bottom: 16px;
+      }
+
+      .card {
+          background: #fff;
+          padding: 16px;
+          border-radius: 10px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      input[type="file"] {
+          width: 100%;
+          margin-bottom: 12px;
+      }
+
+      button {
+          width: 100%;
+          padding: 12px;
+          border-radius: 6px;
+          border: none;
+          background: #2563eb;
+          color: #fff;
+          font-size: 16px;
+          cursor: pointer;
+      }
+
+      .preview {
+          margin-top: 16px;
+          text-align: center;
+      }
+
+      .preview img {
+          max-width: 100%;
+          border-radius: 8px;
+          margin-bottom: 10px;
+      }
+
+      .url-box {
+          display: flex;
+          gap: 6px;
+      }
+
+      .url-box input {
+          flex: 1;
+          padding: 10px;
+          border-radius: 6px;
+          border: 1px solid #ccc;
+      }
+
+      .copy {
+          padding: 10px 14px;
+          border-radius: 6px;
+          border: none;
+          background: #10b981;
+          color: white;
+          cursor: pointer;
+      }
+
+      .loading {
+          margin-top: 10px;
+          font-size: 14px;
+          color: #555;
+      }
+  </style>
+</head>
+<body>
+
+<h1>☁️ Upload Image</h1>
+<h2><a href="products.html">Products</a></h2>
+
+<div class="card">
+  <input accept="image/*" id="file" type="file" />
+  <button onclick="uploadImage()">Upload to Cloudinary</button>
+
+  <div class="loading" id="loading"></div>
+
+  <div class="preview" id="preview" style="display:none">
+    <img id="imagePreview" />
+    <div class="url-box">
+      <input id="imageUrl" readonly type="text" />
+      <button class="copy" onclick="copyUrl()">Copy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 🔴 CHANGE THESE
+  const CLOUD_NAME = 'dvcir66jw';
+  const UPLOAD_PRESET = 'sabkuch_unsigned';
+
+  async function uploadImage() {
+    const fileInput = document.getElementById('file');
+    const file = fileInput.files[0];
+
+    if (!file) {
+      alert('Please select an image');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+
+    document.getElementById('loading').innerText = 'Uploading...';
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+      {
+        method: 'POST',
+        body: formData,
+      },
+    );
+
+    const data = await res.json();
+
+    document.getElementById('loading').innerText = '';
+
+    document.getElementById('preview').style.display = 'block';
+    document.getElementById('imagePreview').src = data.secure_url;
+    document.getElementById('imageUrl').value = data.secure_url;
+  }
+
+  function copyUrl() {
+    const input = document.getElementById('imageUrl');
+    input.select();
+    document.execCommand('copy');
+    alert('Image URL copied!');
+  }
+</script>
+
+</body>
+</html>
