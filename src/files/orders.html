@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin – Orders</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+  <style>
+      * {
+          box-sizing: border-box;
+          font-family: Arial, sans-serif;
+      }
+
+      body {
+          margin: 0;
+          background: #f4f6f8;
+          padding: 16px;
+      }
+
+      h1 {
+          margin-bottom: 12px;
+      }
+
+      .password {
+          width: 100%;
+          padding: 10px;
+          border-radius: 6px;
+          border: 1px solid #ccc;
+          margin-bottom: 16px;
+      }
+
+      .order {
+          background: #fff;
+          border-radius: 12px;
+          padding: 16px;
+          margin-bottom: 16px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .order-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+      }
+
+      .badge {
+          padding: 4px 10px;
+          border-radius: 12px;
+          font-size: 12px;
+          background: #e5e7eb;
+      }
+
+      .meta {
+          font-size: 14px;
+          margin-bottom: 4px;
+          color: #444;
+      }
+
+      .items {
+          margin-top: 12px;
+          border-top: 1px dashed #ddd;
+          padding-top: 12px;
+      }
+
+      .item {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 12px;
+      }
+
+      .item img {
+          width: 60px;
+          height: 60px;
+          border-radius: 6px;
+          object-fit: cover;
+      }
+
+      .item-info {
+          flex: 1;
+          font-size: 14px;
+      }
+
+      .item-info strong {
+          display: block;
+          margin-bottom: 2px;
+      }
+
+      .category {
+          font-size: 12px;
+          background: #f1f5f9;
+          padding: 2px 8px;
+          border-radius: 6px;
+          display: inline-block;
+          margin-top: 4px;
+      }
+
+      select {
+          width: 100%;
+          padding: 10px;
+          margin-top: 10px;
+          border-radius: 6px;
+          border: 1px solid #ccc;
+      }
+
+      .total {
+          font-weight: bold;
+          margin-top: 8px;
+      }
+
+      /* Status colors */
+      .status-pending {
+          background: #fde68a;
+          color: #92400e;
+      }
+
+      .status-preparing {
+          background: #bfdbfe;
+          color: #1e3a8a;
+      }
+
+      .status-ready {
+          background: #bbf7d0;
+          color: #065f46;
+      }
+
+      .status-outForDelivery {
+          background: #e9d5ff;
+          color: #6b21a8;
+      }
+
+      .status-delivered {
+          background: #22c55e;
+          color: #ffffff;
+      }
+
+      .status-returned {
+          background: #fca5a5;
+          color: #7f1d1d;
+      }
+
+      .status-cancelled,
+      .status-cancelledByCustomer,
+      .status-cancelledByRestaurant {
+          background: #ef4444;
+          color: #ffffff;
+      }
+
+  </style>
+</head>
+<body>
+
+<h1>📦 Orders</h1>
+<h2><a href="products.html">Products</a></h2>
+
+<input
+  class="password"
+  id="adminPassword"
+  placeholder="Admin Password"
+  type="password"
+/>
+
+<div id="orders"></div>
+
+<script>
+  const API = '/orders';
+
+  async function loadOrders() {
+    const res = await fetch(API);
+    const orders = await res.json();
+
+    const container = document.getElementById('orders');
+    container.replaceChildren();
+
+    orders.reverse().forEach(order => {
+      const div = document.createElement('div');
+      div.className = 'order';
+
+      div.innerHTML = `
+        <div class="order-header">
+          <strong>${order.customerName}</strong>
+          <span class="badge status-${order.status}">
+            ${order.status}
+          </span>
+
+        </div>
+
+        <div class="meta">📞 ${order.phone}</div>
+        <div class="meta">📍 ${order.address}</div>
+
+        <div class="items">
+          ${order.items.map(i => `
+            <div class="item">
+              <img src="${i.productImage}" />
+              <div class="item-info">
+                <strong>${i.productName}</strong>
+                <div>${i.productDescription}</div>
+                <div class="category">${i.productCategory}</div>
+                <div>
+                  Qty: ${i.qty} × ₹${i.price} = ₹${i.totalPrice}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="total">Total: ₹${order.netPrice}</div>
+
+        <select onchange="updateStatus('${order._id}', this.value)">
+          ${statusOptions(order.status)}
+        </select>
+      `;
+
+      container.appendChild(div);
+    });
+  }
+
+  function statusOptions(current) {
+    const statuses = [
+      'pending',
+      'preparing',
+      'ready',
+      'outForDelivery',
+      'delivered',
+      'returned',
+      'cancelled',
+      'cancelledByCustomer',
+      'cancelledByRestaurant',
+    ];
+
+    return statuses.map(s =>
+      `<option value="${s}" ${s === current ? 'selected' : ''}>${s}</option>`,
+    ).join('');
+  }
+
+  async function updateStatus(orderId, status) {
+    const password = document.getElementById('adminPassword').value;
+
+    if (!password) {
+      alert('Admin password required');
+      return;
+    }
+
+    await fetch(`${API}/${orderId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, status }),
+    });
+
+    loadOrders();
+  }
+
+  loadOrders();
+  // Auto refresh every 10 seconds
+  setInterval(() => {
+    loadOrders();
+  }, 10000);
+
+</script>
+
+</body>
+</html>
