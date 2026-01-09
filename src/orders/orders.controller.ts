@@ -1,7 +1,10 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import {
+  UpdateOrderAcceptDto,
+  UpdateOrderStatusDto,
+} from './dto/update-order-status.dto';
 import { ConfigService } from '@nestjs/config';
 
 @Controller('orders')
@@ -32,12 +35,29 @@ export class OrdersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateOrderDto: UpdateOrderStatusDto,
+  ) {
     if (
       updateOrderDto.password !==
       this.configService.get<string>('ADMIN_PASSWORD')
     )
       throw new Error('Invalid password');
     return this.ordersService.updateStatus(id, updateOrderDto);
+  }
+
+  @Patch('acceptOrder/:id')
+  acceptOrder(
+    @Param('id') id: string,
+    @Body() updateOrderDto: UpdateOrderAcceptDto,
+  ) {
+    console.log(updateOrderDto);
+    if (
+      updateOrderDto.password !==
+      this.configService.get<string>('ADMIN_PASSWORD')
+    )
+      throw new Error('Invalid password');
+    return this.ordersService.acceptOrder(id, updateOrderDto);
   }
 }

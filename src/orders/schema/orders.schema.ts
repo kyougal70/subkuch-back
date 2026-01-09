@@ -46,6 +46,12 @@ export class Order {
   phone: string;
   @Prop({ type: String, required: true })
   address: string;
+  @Prop({ type: Number, required: false })
+  lat: number;
+  @Prop({ type: Number, required: false })
+  lng: number;
+  @Prop({ type: String, required: false })
+  orderAcceptedBy: string;
   @Prop({ type: String, enum: OrderStatus, required: true })
   status: OrderStatus;
 }

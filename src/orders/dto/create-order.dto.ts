@@ -49,4 +49,8 @@ export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
   address: string;
+  @IsNumber()
+  lat: number;
+  @IsNumber()
+  lng: number;
 }

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import {
+  UpdateOrderAcceptDto,
+  UpdateOrderStatusDto,
+} from './dto/update-order-status.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Order, OrderStatus } from './schema/orders.schema';
 import { Model } from 'mongoose';
@@ -45,10 +48,24 @@ export class OrdersService {
     return true;
   }
 
-  async updateStatus(id: string, updateOrderDto: UpdateOrderDto) {
+  async updateStatus(id: string, updateOrderDto: UpdateOrderStatusDto) {
     const x = await this.orderModel.findOneAndUpdate(
       { _id: id },
       { status: updateOrderDto.status },
+      {
+        new: true,
+      },
+    );
+    if (!x) {
+      throw new Error('Order not updated');
+    }
+    return x;
+  }
+
+  async acceptOrder(id: string, updateOrderAcceptDto: UpdateOrderAcceptDto) {
+    const x = await this.orderModel.findOneAndUpdate(
+      { _id: id },
+      { orderAcceptedBy: updateOrderAcceptDto.orderAcceptedBy },
       {
         new: true,
       },

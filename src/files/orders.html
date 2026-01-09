@@ -12,9 +12,9 @@
       }
 
       body {
-          margin: 0;
           background: #f4f6f8;
           padding: 16px;
+          margin: 0;
       }
 
       h1 {
@@ -29,32 +29,94 @@
           margin-bottom: 16px;
       }
 
+      /* ================= ORDER CARD BASE ================= */
       .order {
-          background: #fff;
           border-radius: 12px;
           padding: 16px;
           margin-bottom: 16px;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
+          border-left: 6px solid transparent;
       }
 
+      /* ================= ORDER STATES ================= */
+
+      /* 🔵 Unaccepted */
+      .order-unaccepted {
+          background: #eff6ff;
+          border-left-color: #2563eb;
+          animation: pulse 2s infinite;
+      }
+
+      /* 🟡 Accepted */
+      .order-accepted {
+          background: #fff7ed;
+          border-left-color: #f59e0b;
+      }
+
+      /* 🟢 Delivered */
+      .order-delivered {
+          background: #ecfdf5;
+          border-left-color: #22c55e;
+          opacity: 0.9;
+      }
+
+      /* Pulse animation */
+      @keyframes pulse {
+          0% {
+              box-shadow: 0 0 0 0 rgba(37, 99, 235, .4);
+          }
+          70% {
+              box-shadow: 0 0 0 8px rgba(37, 99, 235, 0);
+          }
+          100% {
+              box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+          }
+      }
+
+      /* ================= COMMON ================= */
       .order-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 8px;
       }
 
       .badge {
           padding: 4px 10px;
           border-radius: 12px;
           font-size: 12px;
-          background: #e5e7eb;
+          color: white;
+      }
+
+      .status-pending {
+          background: #f59e0b;
+      }
+
+      .status-delivered {
+          background: #22c55e;
       }
 
       .meta {
           font-size: 14px;
-          margin-bottom: 4px;
-          color: #444;
+          margin-top: 4px;
+      }
+
+      button, select {
+          width: 100%;
+          padding: 10px;
+          border-radius: 6px;
+          border: none;
+          margin-top: 8px;
+          cursor: pointer;
+      }
+
+      .accept-btn {
+          background: #2563eb;
+          color: white;
+      }
+
+      .map-btn {
+          background: #16a34a;
+          color: white;
       }
 
       .items {
@@ -66,7 +128,7 @@
       .item {
           display: flex;
           gap: 10px;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
       }
 
       .item img {
@@ -76,186 +138,204 @@
           object-fit: cover;
       }
 
-      .item-info {
-          flex: 1;
-          font-size: 14px;
-      }
-
-      .item-info strong {
-          display: block;
-          margin-bottom: 2px;
-      }
-
       .category {
           font-size: 12px;
-          background: #f1f5f9;
+          background: #e5e7eb;
           padding: 2px 8px;
           border-radius: 6px;
-          display: inline-block;
-          margin-top: 4px;
       }
 
-      select {
-          width: 100%;
-          padding: 10px;
-          margin-top: 10px;
-          border-radius: 6px;
-          border: 1px solid #ccc;
+      /* ================= MODAL ================= */
+      .modal {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, .4);
+          display: none;
+          justify-content: center;
+          align-items: center;
       }
 
-      .total {
-          font-weight: bold;
-          margin-top: 8px;
+      .modal-content {
+          background: #fff;
+          padding: 16px;
+          border-radius: 12px;
+          width: 280px;
       }
 
-      /* Status colors */
-      .status-pending {
-          background: #fde68a;
-          color: #92400e;
+      .chips {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
       }
 
-      .status-preparing {
-          background: #bfdbfe;
-          color: #1e3a8a;
+      .chip {
+          background: #e0f2fe;
+          padding: 6px 12px;
+          border-radius: 16px;
+          cursor: pointer;
       }
 
-      .status-ready {
-          background: #bbf7d0;
-          color: #065f46;
+      .close-btn {
+          cursor: pointer;
+          font-size: 18px;
       }
-
-      .status-outForDelivery {
-          background: #e9d5ff;
-          color: #6b21a8;
-      }
-
-      .status-delivered {
-          background: #22c55e;
-          color: #ffffff;
-      }
-
-      .status-returned {
-          background: #fca5a5;
-          color: #7f1d1d;
-      }
-
-      .status-cancelled,
-      .status-cancelledByCustomer,
-      .status-cancelledByRestaurant {
-          background: #ef4444;
-          color: #ffffff;
-      }
-
   </style>
 </head>
+
 <body>
 
 <h1>📦 Orders</h1>
-<h2><a href="products.html">Products</a></h2>
-
-<input
-  class="password"
-  id="adminPassword"
-  placeholder="Admin Password"
-  type="password"
-/>
+<h2><a href="/files/products.html">Products</a></h2>
+<input class="password" id="adminPassword" placeholder="Admin Password" type="password">
 
 <div id="orders"></div>
 
+<!-- MODAL -->
+<div class="modal" id="acceptModal" onclick="closeModalOutside(event)">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;">
+      <strong>Select Delivery Person</strong>
+      <span class="close-btn" onclick="closeModal()">✖</span>
+    </div>
+    <div class="chips" id="deliveryUsers"></div>
+  </div>
+</div>
+
+<!-- SOUNDS -->
+<audio id="normalSound" src="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg"></audio>
+<audio id="highSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
+
 <script>
   const API = '/orders';
+  const deliveryUsers = ['Akash', 'Boby'];
+  const HIGH_VALUE = 500;
+  let selectedOrderId = null;
 
   async function loadOrders() {
+    const pass = localStorage.getItem('admin_pass');
+    if (pass) document.getElementById('adminPassword').value = pass;
     const res = await fetch(API);
     const orders = await res.json();
-
     const container = document.getElementById('orders');
-    container.replaceChildren();
+    container.innerHTML = '';
+
+    let beep = false, highBeep = false;
 
     orders.reverse().forEach(order => {
+      let stateClass = 'order-unaccepted';
+
+      if (order.status === 'delivered') {
+        stateClass = 'order-delivered';
+      } else if (order.orderAcceptedBy) {
+        stateClass = 'order-accepted';
+      } else {
+        if (order.netPrice >= HIGH_VALUE) highBeep = true;
+        else beep = true;
+      }
+
       const div = document.createElement('div');
-      div.className = 'order';
+      div.className = `order ${stateClass}`;
+
+      const acceptSection = !order.orderAcceptedBy
+        ? `<button class="accept-btn" onclick="openModal('${order._id}')">🚴 Accept Order</button>`
+        : `<div class="meta"><b>Accepted by:</b> ${order.orderAcceptedBy}</div>`;
 
       div.innerHTML = `
-        <div class="order-header">
-          <strong>${order.customerName}</strong>
-          <span class="badge status-${order.status}">
-            ${order.status}
-          </span>
+      <div class="order-header">
+        <strong>${order.customerName}</strong>
+        <span class="badge status-${order.status}">${order.status}</span>
+      </div>
 
-        </div>
+      <div class="meta">📞 ${order.phone}</div>
+      <div class="meta">📍 ${order.address}</div>
 
-        <div class="meta">📞 ${order.phone}</div>
-        <div class="meta">📍 ${order.address}</div>
+      ${order.lat ? `<button class="map-btn" onclick="openMap(${order.lat},${order.lng})">📍 View on Map</button>` : ''}
 
-        <div class="items">
-          ${order.items.map(i => `
-            <div class="item">
-              <img src="${i.productImage}" />
-              <div class="item-info">
-                <strong>${i.productName}</strong>
-                <div>${i.productDescription}</div>
-                <div class="category">${i.productCategory}</div>
-                <div>
-                  Qty: ${i.qty} × ₹${i.price} = ₹${i.totalPrice}
-                </div>
-              </div>
+      ${acceptSection}
+
+      <div class="items">
+        ${order.items.map(i => `
+          <div class="item">
+            <img src="${i.productImage}">
+            <div>
+              <b>${i.productName}</b>
+              <div>${i.productDescription}</div>
+              <div class="category">${i.productCategory}</div>
+              <div>Qty: ${i.qty} × ₹${i.price}</div>
             </div>
-          `).join('')}
-        </div>
+          </div>`).join('')}
+      </div>
 
-        <div class="total">Total: ₹${order.netPrice}</div>
+      <b>Total: ₹${order.netPrice}</b>
 
-        <select onchange="updateStatus('${order._id}', this.value)">
-          ${statusOptions(order.status)}
-        </select>
-      `;
+      <select onchange="updateStatus('${order._id}',this.value)">
+        ${['pending', 'preparing', 'ready', 'outForDelivery', 'delivered']
+        .map(s => `<option ${s === order.status ? 'selected' : ''}>${s}</option>`).join('')}
+      </select>
+    `;
 
       container.appendChild(div);
     });
+
+    if (highBeep) document.getElementById('highSound').play().catch(() => {
+    });
+    else if (beep) document.getElementById('normalSound').play().catch(() => {
+    });
   }
 
-  function statusOptions(current) {
-    const statuses = [
-      'pending',
-      'preparing',
-      'ready',
-      'outForDelivery',
-      'delivered',
-      'returned',
-      'cancelled',
-      'cancelledByCustomer',
-      'cancelledByRestaurant',
-    ];
-
-    return statuses.map(s =>
-      `<option value="${s}" ${s === current ? 'selected' : ''}>${s}</option>`,
-    ).join('');
+  function openModal(id) {
+    selectedOrderId = id;
+    const box = document.getElementById('deliveryUsers');
+    box.innerHTML = '';
+    deliveryUsers.forEach(u => {
+      const c = document.createElement('div');
+      c.className = 'chip';
+      c.innerText = u;
+      c.onclick = () => acceptOrder(u);
+      box.appendChild(c);
+    });
+    document.getElementById('acceptModal').style.display = 'flex';
   }
 
-  async function updateStatus(orderId, status) {
-    const password = document.getElementById('adminPassword').value;
+  function closeModal() {
+    document.getElementById('acceptModal').style.display = 'none';
+  }
 
-    if (!password) {
-      alert('Admin password required');
-      return;
-    }
+  function closeModalOutside(e) {
+    if (e.target.id === 'acceptModal') closeModal();
+  }
 
-    await fetch(`${API}/${orderId}`, {
+  async function acceptOrder(user) {
+    const pass = document.getElementById('adminPassword').value;
+    localStorage.setItem('admin_pass', pass);
+    if (!pass) return alert('Admin password required');
+    await fetch(`${API}/acceptOrder/${selectedOrderId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, status }),
+      body: JSON.stringify({ password: pass, orderAcceptedBy: user }),
     });
-
+    closeModal();
     loadOrders();
+  }
+
+  async function updateStatus(id, status) {
+    const pass = document.getElementById('adminPassword').value;
+    localStorage.setItem('admin_pass', pass);
+    if (!pass) return alert('Admin password required');
+    await fetch(`${API}/updateStatus/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pass, status }),
+    });
+    loadOrders();
+  }
+
+  function openMap(lat, lng) {
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`);
   }
 
   loadOrders();
-  // Auto refresh every 10 seconds
-  setInterval(() => {
-    loadOrders();
-  }, 10000);
-
+  setInterval(loadOrders, 10000);
 </script>
 
 </body>
