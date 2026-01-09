@@ -334,7 +334,15 @@
     window.open(`https://www.google.com/maps?q=${lat},${lng}`);
   }
 
+  let wakeLock;
+
+  async function keepScreenOn() {
+    wakeLock = await navigator.wakeLock.request('screen');
+  }
+
+
   loadOrders();
+  keepScreenOn();
   setInterval(loadOrders, 10000);
 </script>
 
