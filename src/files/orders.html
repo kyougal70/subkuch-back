@@ -209,7 +209,7 @@
 
 <script>
   const API = '/orders';
-  const deliveryUsers = ['Akash', 'Boby'];
+  const deliveryUsers = [{ name: 'Akash', mobile: '9876543210' }, { name: 'Boby', mobile: '7988620067' }];
   const HIGH_VALUE = 500;
   let selectedOrderId = null;
 
@@ -247,7 +247,7 @@
 
       const acceptSection = !order.orderAcceptedBy
         ? `<button class="accept-btn" onclick="openModal('${order._id}')">🚴 Accept Order</button>`
-        : `<div class="meta"><b>Accepted by:</b> ${order.orderAcceptedBy}</div>`;
+        : `<div class="meta"><b>Accepted by:</b> ${deliveryUsers.find(u => u.mobile === order.orderAcceptedBy).name}</div>`;
 
       div.innerHTML = `
       <div class="order-header">
@@ -275,11 +275,15 @@
             </div>
           </div>`).join('')}
       </div>
-
+      <p>Total Online Paid Amount: ₹${order.onlinePaidAmount}</p>
+      <p>Total Online Paid Amount Staus: ${order.onlinePaymentStatus}</p>
+      <p>Total Balance Amount: ₹${order.netPrice - order.onlinePaidAmount}</p>
+      <a href="${order.paymentScreenShot}" target="_blank"><img src="${order.paymentScreenShot}" alt="paymentScreenShot" width="50" height="50"></a>
+      <br>
       <b>Total: ₹${order.netPrice}</b>
 
       <select onchange="updateStatus('${order._id}',this.value)">
-        ${['pending', 'preparing', 'ready', 'outForDelivery', 'delivered']
+        ${['pending', 'preparing', 'outForDelivery', 'delivered', 'returned', 'cancelled', 'cancelledByCustomer', 'cancelledByRestaurant']
         .map(s => `<option ${s === order.status ? 'selected' : ''}>${s}</option>`).join('')}
       </select>
     `;
@@ -312,8 +316,8 @@
     deliveryUsers.forEach(u => {
       const c = document.createElement('div');
       c.className = 'chip';
-      c.innerText = u;
-      c.onclick = () => acceptOrder(u);
+      c.innerText = u.name;
+      c.onclick = () => acceptOrder(u.mobile);
       box.appendChild(c);
     });
     document.getElementById('acceptModal').style.display = 'flex';

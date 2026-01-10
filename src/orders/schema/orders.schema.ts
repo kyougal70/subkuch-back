@@ -3,14 +3,19 @@ import { HydratedDocument } from 'mongoose';
 
 export enum OrderStatus {
   pending = 'pending',
-  delivered = 'delivered',
-  cancelled = 'cancelled',
   preparing = 'preparing',
-  ready = 'ready',
   outForDelivery = 'outForDelivery',
+  delivered = 'delivered',
   returned = 'returned',
+  cancelled = 'cancelled',
   cancelledByCustomer = 'cancelledByCustomer',
   cancelledByRestaurant = 'cancelledByRestaurant',
+}
+
+export enum PaymentStatus {
+  'notPaid' = 'notPaid',
+  'paid' = 'paid',
+  'partiallyPaid' = 'partiallyPaid',
 }
 
 export class OrderItems {
@@ -54,6 +59,12 @@ export class Order {
   lng: number;
   @Prop({ type: String, required: false })
   orderAcceptedBy: string;
+  @Prop({ type: String, enum: PaymentStatus, required: true })
+  onlinePaymentStatus: PaymentStatus;
+  @Prop({ type: Number, required: true })
+  onlinePaidAmount: number;
+  @Prop({ type: String, required: false })
+  paymentScreenShot: string;
   @Prop({ type: String, enum: OrderStatus, required: true })
   status: OrderStatus;
 }

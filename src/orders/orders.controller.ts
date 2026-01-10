@@ -3,6 +3,7 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import {
   UpdateOrderAcceptDto,
+  UpdateOrderStatusAndPaymentDto,
   UpdateOrderStatusDto,
 } from './dto/update-order-status.dto';
 import { ConfigService } from '@nestjs/config';
@@ -40,7 +41,7 @@ export class OrdersController {
     return this.ordersService.getOrdersByUser(+userId);
   }
 
-  @Patch(':id')
+  @Patch('updateStatus/:id')
   update(
     @Param('id') id: string,
     @Body() updateOrderDto: UpdateOrderStatusDto,
@@ -65,5 +66,13 @@ export class OrdersController {
     )
       throw new Error('Invalid password');
     return this.ordersService.acceptOrder(id, updateOrderDto);
+  }
+
+  @Patch('updateOnlinePayment/:id')
+  updateOnlinePayment(
+    @Param('id') id: string,
+    @Body() updateOrderDto: UpdateOrderStatusAndPaymentDto,
+  ) {
+    return this.ordersService.updateOnlinePayment(id, updateOrderDto);
   }
 }

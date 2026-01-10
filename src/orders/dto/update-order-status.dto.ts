@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { OrderStatus } from '../schema/orders.schema';
 
 export class UpdateOrderStatusDto {
@@ -17,4 +17,13 @@ export class UpdateOrderAcceptDto {
   @IsString()
   @IsNotEmpty()
   orderAcceptedBy: string;
+}
+
+export class UpdateOrderStatusAndPaymentDto {
+  @IsString()
+  @IsNotEmpty()
+  paymentScreenShot: string;
+  @IsNumber()
+  @IsNotEmpty()
+  onlinePaidAmount: number;
 }
