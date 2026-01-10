@@ -53,4 +53,6 @@ export class CreateOrderDto {
   lat: number;
   @IsNumber()
   lng: number;
+  @IsNumber()
+  userId: number;
 }

@@ -16,8 +16,25 @@ export class OrdersService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
+    let userId = 1;
+    if (createOrderDto.userId) {
+      userId = createOrderDto.userId;
+    } else {
+      const findOutMaxUserId = await this.orderModel
+        .find()
+        .sort({ userId: -1 })
+        .limit(1);
+      userId = findOutMaxUserId.length > 0 ? findOutMaxUserId[0].userId + 1 : 1;
+      console.log(
+        'userId',
+        userId,
+        findOutMaxUserId[0].userId,
+        findOutMaxUserId[0]._id,
+      );
+    }
     const createOrder = await this.orderModel.create({
       ...createOrderDto,
+      userId,
       status: OrderStatus.pending,
     });
     if (!createOrder) {
@@ -46,6 +63,13 @@ export class OrdersService {
       throw new Error('Order not cancelled try again or contact us by phone');
     }
     return true;
+  }
+
+  async getOrdersByUser(userId: number) {
+    return this.orderModel
+      .find({ userId })
+      .sort({ createdAt: -1 }) // latest first
+      .exec();
   }
 
   async updateStatus(id: string, updateOrderDto: UpdateOrderStatusDto) {

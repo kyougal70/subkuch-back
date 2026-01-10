@@ -187,7 +187,9 @@
 <h1>📦 Orders</h1>
 <h2><a href="/files/products.html">Products</a></h2>
 <input class="password" id="adminPassword" placeholder="Admin Password" type="password">
-
+<div class="filter-bar" id="filterBar" style="display:none">
+  <button class="filter-btn" onclick="clearUserFilter()">⬅ Show All Orders</button>
+</div>
 <div id="orders"></div>
 
 <!-- MODAL -->
@@ -215,13 +217,20 @@
     const pass = localStorage.getItem('admin_pass');
     if (pass) document.getElementById('adminPassword').value = pass;
     const res = await fetch(API);
-    const orders = await res.json();
+    let orders = await res.json();
     const container = document.getElementById('orders');
     container.innerHTML = '';
 
     let beep = false, highBeep = false;
 
-    orders.reverse().forEach(order => {
+    const newOrders = selectedUserId
+      ? orders.filter(o => o.userId === selectedUserId)
+      : orders;
+
+    document.getElementById('filterBar').style.display =
+      selectedUserId ? 'block' : 'none';
+
+    newOrders.reverse().forEach(order => {
       let stateClass = 'order-unaccepted';
 
       if (order.status === 'delivered') {
@@ -242,11 +251,12 @@
 
       div.innerHTML = `
       <div class="order-header">
+      <h3 onclick="filterByUser(${order.userId})" style="cursor: pointer;">UserId - <strong style="color: blue">${order.userId}</strong></h3>
         <strong>${order.customerName}</strong>
         <span class="badge status-${order.status}">${order.status}</span>
       </div>
 
-      <div class="meta">📞 ${order.phone}</div>
+      <div class="meta">📞 <a href="tel:${order.phone}">${order.phone}</a></div>
       <div class="meta">📍 ${order.address}</div>
 
       ${order.lat ? `<button class="map-btn" onclick="openMap(${order.lat},${order.lng})">📍 View on Map</button>` : ''}
@@ -281,6 +291,18 @@
     });
     else if (beep) document.getElementById('normalSound').play().catch(() => {
     });
+  }
+
+  let selectedUserId = null;
+
+  function filterByUser(userId) {
+    selectedUserId = userId;
+    loadOrders();
+  }
+
+  function clearUserFilter() {
+    selectedUserId = null;
+    loadOrders();
   }
 
   function openModal(id) {

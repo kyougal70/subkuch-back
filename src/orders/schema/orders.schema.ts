@@ -40,6 +40,8 @@ export class Order {
   items: OrderItems[];
   @Prop({ type: Number, required: true })
   netPrice: number;
+  @Prop({ type: Number, required: true })
+  userId: number;
   @Prop({ type: String, required: true })
   customerName: string;
   @Prop({ type: String, required: true })

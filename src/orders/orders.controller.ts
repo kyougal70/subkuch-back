@@ -34,6 +34,12 @@ export class OrdersController {
     return this.ordersService.cancelOrder(id);
   }
 
+  @Get('my-orders/:userId')
+  getMyOrders(@Param('userId') userId: string) {
+    console.log(userId, 'userId in controller orders');
+    return this.ordersService.getOrdersByUser(+userId);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,
