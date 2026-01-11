@@ -4,6 +4,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductCategory, ProductStatus } from './schema/product.schema';
 import { ConfigService } from '@nestjs/config';
+
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Controller('products')
@@ -34,15 +35,15 @@ export class ProductsController {
     return this.productsService.findAll(name, category, isAvailable, status);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
-  }
-
   @Get('test')
   test() {
     console.log('test start');
     return true;
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.productsService.findOne(id);
   }
 
   @Cron(CronExpression.EVERY_30_SECONDS)
