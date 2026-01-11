@@ -35,9 +35,10 @@ export class ProductsService {
   ) {
     const query = {};
     if (name) {
+      query['name'] = { $regex: name, $options: 'i' };
     }
     if (category) {
-      query['category'] = category;
+      query['category'] = { $in: [category] };
     }
     if (isAvailable) {
       query['isAvailable'] = isAvailable;
